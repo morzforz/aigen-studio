@@ -51,6 +51,29 @@ const emptySetting = (): SettingWrite => ({
   refImagePath: "",
 });
 
+const TAB_HELP: Record<Tab, { label: string; blurb: string }> = {
+  characters: {
+    label: "Characters",
+    blurb:
+      "Save people for your stories: prose bios, personality, voice notes, and optional image tags.",
+  },
+  settings: {
+    label: "Settings",
+    blurb:
+      "Places and world lore—locations, atmosphere, and notes you can reuse across stories and image prompts.",
+  },
+  scaffold: {
+    label: "Scaffold",
+    blurb:
+      "Pick characters and settings to draft NovelAI-oriented memory, lorebook entries, and a system prompt (copy or download).",
+  },
+  gallery: {
+    label: "Gallery",
+    blurb:
+      "Human-only NovelAI image generate (one click = one image) or import PNGs into your durable vault.",
+  },
+};
+
 export function App() {
   const [tokenInput, setTokenInput] = useState(getStoredToken);
   const [tokenSaved, setTokenSaved] = useState(Boolean(getStoredToken()));
@@ -67,8 +90,16 @@ export function App() {
 
   function saveToken(e: FormEvent) {
     e.preventDefault();
-    setStoredToken(tokenInput.trim());
-    setTokenSaved(Boolean(tokenInput.trim()));
+    const next = tokenInput.trim();
+    setStoredToken(next);
+    setTokenSaved(Boolean(next));
+    void qc.invalidateQueries();
+  }
+
+  function clearToken() {
+    setTokenInput("");
+    setStoredToken("");
+    setTokenSaved(false);
     void qc.invalidateQueries();
   }
 
@@ -77,82 +108,191 @@ export function App() {
     setSearchApplied(search.trim());
   }
 
+  const apiReachable = Boolean(health.data) && !health.isError;
+  const activeTab = TAB_HELP[tab];
+
   return (
     <div className="page wide">
       <header className="header">
         <h1>Aigen Studio</h1>
         <p className="tagline">
-          Lore, scaffolding, and NovelAI image vault (human generate only)
+          Your local hub for NovelAI <strong>image</strong> workflows and{" "}
+          <strong>story lore</strong>—durable character/setting notes, story
+          scaffolding drafts, and a private image vault.
+        </p>
+        <p className="lede">
+          This page talks to the Aigen Studio server running on your machine (or
+          over Tailscale). It does not replace NovelAI&apos;s website; it stores
+          your library and vault, and can call NovelAI image generation only when{" "}
+          <em>you</em> click Generate.
         </p>
       </header>
 
-      <section className="card">
-        <h2>Server health</h2>
-        {health.isLoading && <p>Checking…</p>}
+      <section className="card intro-card" aria-labelledby="get-started-heading">
+        <h2 id="get-started-heading">Get started</h2>
+        <p className="hint">
+          Follow these steps in order the first time you open the app.
+        </p>
+        <ol className="steps">
+          <li>
+            <strong>Start the server</strong> (if it is not already running): from
+            the project folder run{" "}
+            <code>./scripts/run-dev.sh</code> or <code>pnpm start</code>. You
+            should see the API on port <code>8787</code> and this UI on{" "}
+            <code>5173</code>.
+          </li>
+          <li>
+            <strong>Confirm server health</strong> below turns green
+            (&quot;API reachable&quot;). If it is red, the browser cannot reach
+            the API—start the server and refresh.
+          </li>
+          <li>
+            <strong>Paste your app token</strong> and click Save. The token unlocks
+            Characters, Settings, Scaffold, and Gallery. Get it with{" "}
+            <code>pnpm auth:show</code> or from the server log on first start.
+          </li>
+          <li>
+            <strong>Pick a tab</strong>: start with Characters or Settings to add
+            lore, use Scaffold to export story setup text, or Gallery for images.
+          </li>
+        </ol>
+      </section>
+
+      <section className="card" aria-labelledby="health-heading">
+        <h2 id="health-heading">1. Server health</h2>
+        <p className="hint">
+          Checks whether this browser can reach the Aigen Studio API. Health does{" "}
+          <strong>not</strong> require your app token.
+        </p>
+        {health.isLoading && <p className="hint">Checking connection…</p>}
         {health.isError && (
-          <p className="error">
-            Cannot reach API. Run <code>./scripts/run-dev.sh</code> or{" "}
-            <code>pnpm start</code>.
-          </p>
+          <div className="callout callout-error">
+            <p className="error">
+              <strong>API not reachable.</strong> The UI is open, but the server
+              is not responding.
+            </p>
+            <p className="hint">
+              From the repo root, start it with{" "}
+              <code>./scripts/run-dev.sh</code> or <code>pnpm start</code>, then
+              wait a few seconds and this section should update automatically.
+            </p>
+          </div>
         )}
         {health.data && (
-          <p className="ok">
-            <strong>{health.data.status}</strong> · {health.data.service} ·{" "}
-            {health.data.time}
-          </p>
+          <div className="callout callout-ok">
+            <p className="ok">
+              <strong>API reachable</strong> — {health.data.service} reports{" "}
+              <code>{health.data.status}</code>.
+            </p>
+            <p className="meta">Last check: {health.data.time}</p>
+          </div>
         )}
       </section>
 
-      <section className="card">
-        <h2>App token</h2>
-        <p className="hint">
-          <code>pnpm auth:show</code> or first-start server log
+      <section className="card" aria-labelledby="token-heading">
+        <h2 id="token-heading">2. App token (required for features)</h2>
+        <p>
+          The <strong>app token</strong> is a secret password for{" "}
+          <em>your</em> Aigen Studio server. Every feature except health sends it
+          as a Bearer token so only you can read or write the lore vault and
+          gallery.
         </p>
-        <form onSubmit={saveToken} className="row">
-          <input
-            type="password"
-            value={tokenInput}
-            onChange={(e) => setTokenInput(e.target.value)}
-            placeholder="Bearer app token"
-            autoComplete="off"
-          />
-          <button type="submit">Save</button>
+        <ul className="plain-list">
+          <li>
+            <strong>Where to get it:</strong> run <code>pnpm auth:show</code> in
+            the project, or copy the token printed in the server log the first
+            time the server starts (file{" "}
+            <code>secrets/app-token</code> under your data directory).
+          </li>
+          <li>
+            <strong>Where it is stored:</strong> only in this browser&apos;s{" "}
+            <code>localStorage</code> after you click Save—not on NovelAI, and not
+            in the URL.
+          </li>
+          <li>
+            <strong>Without a saved token:</strong> tabs stay locked. You can
+            still see this page and health status.
+          </li>
+        </ul>
+        <form onSubmit={saveToken} className="stack token-form">
+          <label>
+            App token
+            <input
+              type="password"
+              value={tokenInput}
+              onChange={(e) => setTokenInput(e.target.value)}
+              placeholder="Paste token from pnpm auth:show"
+              autoComplete="off"
+              aria-describedby="token-status"
+            />
+          </label>
+          <div className="row wrap">
+            <button type="submit">Save token</button>
+            {tokenSaved ? (
+              <button type="button" className="secondary" onClick={clearToken}>
+                Clear saved token
+              </button>
+            ) : null}
+          </div>
         </form>
+        <div id="token-status" className="token-status">
+          {tokenSaved ? (
+            <p className="ok">
+              <strong>Token saved in this browser.</strong> Characters, Settings,
+              Scaffold, and Gallery can call the API. Continue with the tabs
+              below.
+            </p>
+          ) : (
+            <p className="callout callout-warn">
+              <strong>No token saved yet.</strong> Feature tabs are locked until
+              you paste a token and click Save. Obtain one with{" "}
+              <code>pnpm auth:show</code>
+              {apiReachable
+                ? " (server is up—good time to grab the token)."
+                : " after the server is running."}
+            </p>
+          )}
+        </div>
       </section>
 
-      <nav className="tabs">
-        <button
-          type="button"
-          className={tab === "characters" ? "tab active" : "tab"}
-          onClick={() => setTab("characters")}
-        >
-          Characters
-        </button>
-        <button
-          type="button"
-          className={tab === "settings" ? "tab active" : "tab"}
-          onClick={() => setTab("settings")}
-        >
-          Settings
-        </button>
-        <button
-          type="button"
-          className={tab === "scaffold" ? "tab active" : "tab"}
-          onClick={() => setTab("scaffold")}
-        >
-          Scaffold
-        </button>
-        <button
-          type="button"
-          className={tab === "gallery" ? "tab active" : "tab"}
-          onClick={() => setTab("gallery")}
-        >
-          Gallery
-        </button>
-      </nav>
+      <section className="card" aria-labelledby="areas-heading">
+        <h2 id="areas-heading">3. What you can do here</h2>
+        <p className="hint">
+          Choose an area. Each tab needs a saved app token
+          {tokenSaved ? " (you are unlocked)." : " (save a token first)."}
+        </p>
+        <nav className="tabs" aria-label="Product areas">
+          {(Object.keys(TAB_HELP) as Tab[]).map((key) => (
+            <button
+              key={key}
+              type="button"
+              className={tab === key ? "tab active" : "tab"}
+              onClick={() => setTab(key)}
+              aria-current={tab === key ? "page" : undefined}
+            >
+              {TAB_HELP[key].label}
+            </button>
+          ))}
+        </nav>
+        <div className="tab-blurb">
+          <p>
+            <strong>{activeTab.label}:</strong> {activeTab.blurb}
+          </p>
+        </div>
+        <ul className="tab-guide plain-list">
+          {(Object.keys(TAB_HELP) as Tab[]).map((key) => (
+            <li key={key}>
+              <strong>{TAB_HELP[key].label}</strong> — {TAB_HELP[key].blurb}
+            </li>
+          ))}
+        </ul>
+      </section>
 
       {tab !== "scaffold" && tab !== "gallery" && (
         <section className="card">
+          <h2 className="visually-quiet">
+            Search {tab === "characters" ? "characters" : "settings"}
+          </h2>
           <form onSubmit={applySearch} className="row">
             <input
               value={search}
@@ -184,7 +324,19 @@ export function App() {
       )}
 
       {!tokenSaved && (
-        <p className="hint">Save an app token to use lore and scaffolding.</p>
+        <section className="card callout callout-warn" aria-live="polite">
+          <h2>Features locked</h2>
+          <p>
+            Save an app token in step 2 above to unlock{" "}
+            <strong>{activeTab.label}</strong> and the other tabs. Until then the
+            server will reject API calls as unauthorized.
+          </p>
+          <p className="hint">
+            After saving: open <strong>Characters</strong> or{" "}
+            <strong>Settings</strong> to add lore, then <strong>Scaffold</strong>{" "}
+            to compose story text, or <strong>Gallery</strong> for images.
+          </p>
+        </section>
       )}
 
       {tokenSaved && tab === "characters" && (
