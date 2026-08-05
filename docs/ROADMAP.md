@@ -32,7 +32,7 @@ Stack and detailed design decisions belong in architecture/design docs once they
 
 | Field | Value |
 |-------|--------|
-| **Active milestone** | M1 — Application scaffold |
+| **Active milestone** | M2 — Lore repository (characters / settings) |
 | **Default sequence** | Lore-first (M0 → M1 → M2 → M3 → M4 → later) |
 | **Alternate path** | If lost images/settings dominate daily pain: after M1, do a thin vault/import slice before or in parallel with M2 (see [Sequencing notes](#sequencing-notes)) |
 
@@ -43,7 +43,7 @@ Stack and detailed design decisions belong in architecture/design docs once they
 | ID | Milestone | Status | Depends on |
 |----|-----------|--------|------------|
 | M0 | Architecture sketch | Implemented | CONCEPT |
-| M1 | Application scaffold | Not started | M0 |
+| M1 | Application scaffold | Implemented | M0 |
 | M2 | Lore repository (characters / settings) | Not started | M1 |
 | M3 | Story scaffolding (export-first) | Not started | M2 |
 | M4 | Image path (generate + vault + metadata) | Not started | M1 (M2 recommended) |
@@ -85,8 +85,9 @@ Stack and detailed design decisions belong in architecture/design docs once they
 
 | | |
 |--|--|
-| **Status** | Not started |
+| **Status** | Implemented (2026-08-04) |
 | **Goal** | Empty but real: run server on Mac, hit API from a browser (later Tailscale). |
+| **Artifact** | pnpm monorepo (`apps/server`, `apps/web`, `packages/shared`) · [`README.md`](../README.md) |
 
 **Deliverables**
 
@@ -98,9 +99,9 @@ Stack and detailed design decisions belong in architecture/design docs once they
 
 **Acceptance**
 
-- [ ] `dev` (or equivalent) starts server + client
-- [ ] Health (or CRUD) endpoint covered by an automated test
-- [ ] Config does not require NovelAI to start the app
+- [x] `dev` (or equivalent) starts server + client
+- [x] Health (or CRUD) endpoint covered by an automated test
+- [x] Config does not require NovelAI to start the app
 
 ---
 
@@ -260,5 +261,6 @@ Deferred:
 
 | Date | Change |
 |------|--------|
+| 2026-08-04 | **M1 Implemented:** pnpm monorepo scaffold (Hono/SQLite server, Vite/React web, shared Zod); health + notes CRUD under `/api/v1`; auth-lite bearer; Vitest on real `createApp`; README run instructions. Current focus → M2. |
 | 2026-08-04 | **M0 Implemented:** architecture note at `docs/ARCHITECTURE.md` (Node/Hono/SQLite + Vite/React, storage, auth-lite, REST `/api/v1`, modules). Current focus → M1. |
 | 2026-08-04 | Initial roadmap from concept-level milestone discussion (lore-first sequence). |
