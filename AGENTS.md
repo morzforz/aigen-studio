@@ -45,6 +45,16 @@ Agents **must** follow this workflow. Direct commits to `main` are forbidden exc
   `fix: prevent null pointer on missing config`  
   `chore: update INDEX.md with new systems doc`
 
+### Branch hygiene (proactive merge to `main`)
+
+Agents **must** maintain branch hygiene. Do not leave finished feature/fix/chore branches sitting unmerged “for later.”
+
+- **When work is complete, merge it.** As soon as you are **certain** a feature, fix, docs update, or other branch is done—validation green, acceptance criteria met (including roadmap status if applicable), no intentional WIP left—**merge back to `main` in the same session** (or open a PR if that is the active review flow). Do not wait for the user to ask “please merge.”
+- **Certainty means:** the branch’s goal is finished, tests/validation pass on the branch, the tree is clean (or only unrelated untracked noise), and you would not expect further commits on that branch for the same unit of work.
+- **Do not merge** if the work is partial, failing validation, blocked on a user decision, or still marked WIP. In those cases stay on the branch and say what remains.
+- Prefer **one logical unit of work per branch**, then merge and start the next unit from updated `main`. Stacking many completed-but-unmerged branches is discouraged.
+- After merge, delete the local feature branch (`git branch -d …`) so the default checkout for the next task is a clean `main`.
+
 ### Merging Back to `main`
 
 Agents do **not** force-push or rewrite `main` history.
@@ -56,14 +66,14 @@ Preferred path (when the environment supports it):
 4. Re-run validation on `main` after the merge.
 5. Only then delete the feature branch: `git branch -d feature/<name>`
 
-If a pull-request / code-review flow is active in the repo, prefer opening a PR instead of a local merge. Agents should still leave the branch in a review-ready state (validation green, clear commit messages, no WIP commits).
+If a pull-request / code-review flow is active in the repo, prefer opening a PR instead of a local merge—but still do so **promptly when the work is complete**, not as an open-ended deferral. Agents should leave the branch in a review-ready state (validation green, clear commit messages, no WIP commits) and open the PR (or merge locally when no PR flow is required) without waiting for an extra merge prompt.
 
 ### Conflict & Safety Rules
 
 - Never resolve merge conflicts by blindly accepting “ours” or “theirs” on files that contain critical identifiers, configuration, generated references, binary data, or complex structured formats that text merges can corrupt. Prefer regenerating or carefully reconciling such files after the textual conflict is cleaned.
 - If a conflict touches complex structured files (configs, schemas, serialized data), treat it as a high-risk change: re-validate thoroughly before considering the merge done.
 - Agents must not `git push --force` to `main` or to any shared branch.
-- When in doubt, leave the feature branch unmerged and document the exact state + remaining work in the commit message or a short note in `INDEX.md` / the relevant design doc.
+- When in doubt **about correctness or conflicts**, leave the feature branch unmerged and document the exact state + remaining work in the commit message or a short note in `INDEX.md` / the relevant design doc. “When in doubt” is about risk and unfinished work—not permission to skip merging work you already know is complete.
 
 ### LFS & Binary Hygiene
 
