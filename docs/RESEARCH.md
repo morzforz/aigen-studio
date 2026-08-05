@@ -1,6 +1,8 @@
-# NovelAI Image Application Research
+# Aigen Studio — Research Log (image-focused)
 
-Findings log for third-party frontends, NovelAI platform behavior, and implications for ImageGen Studio. Claims cite source URLs. Product goals and constraints live in [CONCEPT.md](./CONCEPT.md).
+Findings log for third-party frontends, NovelAI platform behavior, and implications for **Aigen Studio** (aigen-studio). Claims cite source URLs. Product goals and constraints live in [CONCEPT.md](./CONCEPT.md).
+
+**Scope note:** This document remains primarily an **image** research log (prior-art clients, NovelAI image APIs/metadata, human-initiated generation policy). Product scope now also includes **text generation assistance**, a **lore repository**, and **story scaffolding** (memory / lorebook / system prompts); those outcomes are defined in CONCEPT.md. Deep research into NovelAI text APIs, lorebook formats, scripting, and browser extensions/userscripts is **not** covered here yet—tracked as later work. NovelAI text-UI integration (replace vs extend vs leave-in-place) is explicitly deferred in CONCEPT.
 
 ---
 
@@ -215,7 +217,7 @@ Source: https://docs.novelai.net/en/image/vibetransfer
 
 ToS (https://novelai.net/terms/) includes restrictions such as not using **botnets or automated systems** that disrespect service limitations or place **excessive strain** on the service (see §9.1.6 in publicly mirrored/crawled text). Community discussion also associates account restrictions with unusual automated activity.
 
-**Product policy (our hard rule):** Regardless of API convenience, ImageGen Studio treats **all NovelAI image generation as human-initiated only**. No automated generation features. See CONCEPT.md §6.
+**Product policy (our hard rule):** Regardless of API convenience, Aigen Studio treats **all NovelAI image generation as human-initiated only**. No automated image generation features. See CONCEPT.md §6.
 
 ---
 
