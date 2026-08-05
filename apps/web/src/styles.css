@@ -51,8 +51,104 @@ body {
 }
 
 .tagline {
-  margin: 0 0 1.5rem;
+  margin: 0 0 0.75rem;
   color: var(--muted);
+}
+
+.lede {
+  margin: 0 0 1.25rem;
+  color: var(--muted);
+  font-size: 0.95rem;
+  max-width: 42rem;
+}
+
+.steps {
+  margin: 0.5rem 0 0;
+  padding-left: 1.25rem;
+}
+
+.steps li {
+  margin-bottom: 0.65rem;
+}
+
+.steps li:last-child {
+  margin-bottom: 0;
+}
+
+.plain-list {
+  margin: 0.5rem 0 1rem;
+  padding-left: 1.25rem;
+}
+
+.plain-list li {
+  margin-bottom: 0.45rem;
+}
+
+.callout {
+  border-radius: 0.5rem;
+  padding: 0.75rem 0.9rem;
+  margin: 0.5rem 0 0;
+  border: 1px solid var(--border);
+}
+
+.callout-ok {
+  border-color: color-mix(in srgb, var(--ok) 40%, var(--border));
+  background: color-mix(in srgb, var(--ok) 10%, transparent);
+}
+
+.callout-error {
+  border-color: color-mix(in srgb, var(--err) 40%, var(--border));
+  background: color-mix(in srgb, var(--err) 8%, transparent);
+}
+
+.callout-warn {
+  border-color: color-mix(in srgb, #e6b84d 45%, var(--border));
+  background: color-mix(in srgb, #e6b84d 10%, transparent);
+}
+
+.callout p {
+  margin: 0.35rem 0 0;
+}
+
+.callout p:first-child {
+  margin-top: 0;
+}
+
+.token-form {
+  margin-top: 0.75rem;
+}
+
+.token-status {
+  margin-top: 0.75rem;
+}
+
+.tab-blurb {
+  margin: 0.25rem 0 0.75rem;
+  padding: 0.65rem 0.8rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border);
+  background: var(--bg);
+}
+
+.tab-blurb p {
+  margin: 0;
+}
+
+.tab-guide {
+  font-size: 0.92rem;
+  color: var(--muted);
+}
+
+.visually-quiet {
+  font-size: 1rem;
+}
+
+.intro-card h2 {
+  margin-bottom: 0.35rem;
+}
+
+.tabs {
+  flex-wrap: wrap;
 }
 
 .card {

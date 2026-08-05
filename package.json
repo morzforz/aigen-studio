@@ -8,7 +8,7 @@
     "start": "./scripts/run-dev.sh",
     "dev": "pnpm -r --parallel --filter @aigen-studio/server --filter @aigen-studio/web dev",
     "build": "pnpm -r --filter @aigen-studio/shared --filter @aigen-studio/server --filter @aigen-studio/web build",
-    "test": "pnpm --filter @aigen-studio/server test",
+    "test": "pnpm --filter @aigen-studio/server test && pnpm --filter @aigen-studio/web test",
     "auth:show": "pnpm --filter @aigen-studio/server auth:show",
     "typecheck": "pnpm -r typecheck"
   },
