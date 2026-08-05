@@ -2,7 +2,7 @@
 
 **Status:** Concept (product outcomes, not implementation design)  
 **Scope:** Full-stack web application for NovelAI **image** generation workflows **and** assistance with **text** generation (NovelAI text, optional local LLMs), plus a durable lore / profile repository for story scaffolding  
-**Related:** [RESEARCH.md](./RESEARCH.md) · [INDEX.md](../INDEX.md)
+**Related:** [ROADMAP.md](./ROADMAP.md) · [RESEARCH.md](./RESEARCH.md) · [INDEX.md](../INDEX.md)
 
 **Product names:** **Aigen Studio** (display) · **aigen-studio** (repo / package identity). Formerly framed as “ImageGen Studio” while the product was image-only; that name is retired.
 

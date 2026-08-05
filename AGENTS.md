@@ -80,6 +80,16 @@ Before making design, architecture, or other high-level decisions, agents **must
 - Documents referenced in `INDEX.md` should be maintained and kept up to date as the project progresses. When an agent makes a lasting design, architecture, or systems decision, it should update the relevant indexed document (or create/update an entry in `INDEX.md` if a new document is warranted).
 - Do not invent design decisions that are already documented elsewhere — prefer the indexed sources.
 
+### Roadmap maintenance (mandatory)
+
+`docs/ROADMAP.md` is the living build plan (milestones, order, current focus). Agents **must** keep it honest:
+
+1. **Consult the roadmap** when planning or starting non-trivial implementation work so effort follows agreed sequencing (or an explicit, documented deviation).
+2. **Mark milestones Implemented** when that milestone’s acceptance criteria in `docs/ROADMAP.md` are met—update status, check off acceptance items, refresh **Current focus**, and add a one-line **Changelog** entry (with date). Do not mark Implemented for a partial spike that fails acceptance.
+3. **Update the roadmap when requirements change**—reprioritize, split/merge, add, defer, or cancel milestones; adjust **Current focus** and **Changelog**. Do not leave the roadmap describing a plan the project has abandoned.
+4. **Do not invent a parallel tracker** (ad-hoc TODO dumps that replace the roadmap). Follow-ups for an in-flight milestone may be bullets under that milestone; product-level sequencing stays in `docs/ROADMAP.md`.
+5. Product **outcomes and hard rules** remain in `docs/CONCEPT.md`; the roadmap does not supersede CONCEPT. If a milestone conflicts with CONCEPT, update CONCEPT (or the milestone) deliberately and keep both consistent.
+
 ### Read-Only Documents
 
 If `READONLY.md` exists in the project root, treat it similarly to `INDEX.md`: it lists important documents and their purposes.
@@ -105,5 +115,6 @@ A change is complete only when:
 - Project validation passes
 - Style and convention rules are followed
 - No known failure patterns remain unaddressed
+- If the change completes a roadmap milestone (or changes sequencing/requirements), `docs/ROADMAP.md` is updated accordingly (see **Roadmap maintenance**)
 
 Keep this `AGENTS.md` updated whenever project conventions, tooling, or preferred patterns change. It is the single source of truth for agents working on this repository.
