@@ -6,20 +6,25 @@ import {
   characterListSchema,
   characterSchema,
   healthResponseSchema,
+  naiGenerateResponseSchema,
   noteListSchema,
   noteSchema,
   scaffoldingComposeResultSchema,
   settingListSchema,
   settingSchema,
+  vaultImageListSchema,
+  vaultImageSchema,
   type Character,
   type CharacterWrite,
   type HealthResponse,
+  type NaiGenerateRequest,
   type Note,
   type NoteCreate,
   type ScaffoldingComposeRequest,
   type ScaffoldingComposeResult,
   type Setting,
   type SettingWrite,
+  type VaultImage,
 } from "@aigen-studio/shared";
 
 const TOKEN_KEY = "aigen-studio.app-token";
@@ -158,4 +163,43 @@ export async function composeScaffolding(
   if (!res.ok)
     throw new Error(`Scaffolding compose failed: ${await readError(res)}`);
   return scaffoldingComposeResultSchema.parse(await res.json());
+}
+
+export async function listVaultImages(): Promise<VaultImage[]> {
+  const res = await request(ApiPaths.vaultImages);
+  if (!res.ok) throw new Error(`List vault failed: ${await readError(res)}`);
+  return vaultImageListSchema.parse(await res.json()).images;
+}
+
+export async function generateNaiImage(
+  input: NaiGenerateRequest,
+): Promise<VaultImage> {
+  const res = await request(ApiPaths.naiImageGenerate, {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+  if (!res.ok) throw new Error(`Generate failed: ${await readError(res)}`);
+  return naiGenerateResponseSchema.parse(await res.json()).image;
+}
+
+export async function importVaultPng(input: {
+  pngBase64: string;
+  prompt?: string;
+  negativePrompt?: string;
+  seed?: string;
+}): Promise<VaultImage> {
+  const res = await request(ApiPaths.vaultImageImport, {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+  if (!res.ok) throw new Error(`Import failed: ${await readError(res)}`);
+  return vaultImageSchema.parse(await res.json());
+}
+
+/** Authenticated image URL for gallery (uses fetch blob when needed). */
+export async function fetchVaultImageObjectUrl(id: string): Promise<string> {
+  const res = await request(ApiPaths.vaultImageFile(id));
+  if (!res.ok) throw new Error(`Image file failed: ${await readError(res)}`);
+  const blob = await res.blob();
+  return URL.createObjectURL(blob);
 }

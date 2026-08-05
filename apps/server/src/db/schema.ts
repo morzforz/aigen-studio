@@ -1,7 +1,7 @@
 /**
- * Drizzle schema — M1 notes + M2 lore (characters, settings).
+ * Drizzle schema — notes, lore, vault images.
  */
-import { sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
 export const notes = sqliteTable("notes", {
   id: text("id").primaryKey(),
@@ -39,6 +39,23 @@ export const settings = sqliteTable("settings", {
   updatedAt: text("updated_at").notNull(),
 });
 
+export const vaultImages = sqliteTable("vault_images", {
+  id: text("id").primaryKey(),
+  relativePath: text("relative_path").notNull(),
+  prompt: text("prompt").notNull().default(""),
+  negativePrompt: text("negative_prompt").notNull().default(""),
+  seed: text("seed").notNull().default(""),
+  model: text("model").notNull().default(""),
+  width: integer("width"),
+  height: integer("height"),
+  source: text("source").notNull(),
+  extractedMetadataJson: text("extracted_metadata_json").notNull().default("{}"),
+  sha256: text("sha256").notNull(),
+  byteSize: integer("byte_size").notNull(),
+  createdAt: text("created_at").notNull(),
+});
+
 export type NoteRow = typeof notes.$inferSelect;
 export type CharacterRow = typeof characters.$inferSelect;
 export type SettingRow = typeof settings.$inferSelect;
+export type VaultImageRow = typeof vaultImages.$inferSelect;

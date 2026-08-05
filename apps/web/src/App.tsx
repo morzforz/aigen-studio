@@ -1,11 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import type {
   Character,
   CharacterWrite,
   ScaffoldingComposeResult,
   Setting,
   SettingWrite,
+  VaultImage,
 } from "@aigen-studio/shared";
 import {
   composeScaffolding,
@@ -14,15 +15,19 @@ import {
   deleteCharacter,
   deleteSetting,
   fetchHealth,
+  fetchVaultImageObjectUrl,
+  generateNaiImage,
   getStoredToken,
+  importVaultPng,
   listCharacters,
   listSettings,
+  listVaultImages,
   setStoredToken,
   updateCharacter,
   updateSetting,
 } from "./api";
 
-type Tab = "characters" | "settings" | "scaffold";
+type Tab = "characters" | "settings" | "scaffold" | "gallery";
 
 const emptyCharacter = (): CharacterWrite => ({
   name: "",
@@ -77,7 +82,7 @@ export function App() {
       <header className="header">
         <h1>Aigen Studio</h1>
         <p className="tagline">
-          Lore repository &amp; story scaffolding (memory / lorebook / system prompt)
+          Lore, scaffolding, and NovelAI image vault (human generate only)
         </p>
       </header>
 
@@ -137,9 +142,16 @@ export function App() {
         >
           Scaffold
         </button>
+        <button
+          type="button"
+          className={tab === "gallery" ? "tab active" : "tab"}
+          onClick={() => setTab("gallery")}
+        >
+          Gallery
+        </button>
       </nav>
 
-      {tab !== "scaffold" && (
+      {tab !== "scaffold" && tab !== "gallery" && (
         <section className="card">
           <form onSubmit={applySearch} className="row">
             <input
@@ -182,6 +194,7 @@ export function App() {
         <SettingsPanel search={searchApplied} />
       )}
       {tokenSaved && tab === "scaffold" && <ScaffoldPanel />}
+      {tokenSaved && tab === "gallery" && <GalleryPanel />}
     </div>
   );
 }
@@ -802,5 +815,211 @@ function slug(title: string): string {
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-|-$/g, "") || "story"
+  );
+}
+
+function GalleryPanel() {
+  const qc = useQueryClient();
+  const [prompt, setPrompt] = useState("");
+  const [negativePrompt, setNegativePrompt] = useState("");
+  const [seed, setSeed] = useState("");
+  const [status, setStatus] = useState("");
+
+  const characters = useQuery({
+    queryKey: ["characters", ""],
+    queryFn: () => listCharacters(),
+    retry: false,
+  });
+
+  const images = useQuery({
+    queryKey: ["vault-images"],
+    queryFn: listVaultImages,
+    retry: false,
+  });
+
+  const generate = useMutation({
+    mutationFn: generateNaiImage,
+    onSuccess: async () => {
+      setStatus("Generated and saved to vault.");
+      await qc.invalidateQueries({ queryKey: ["vault-images"] });
+    },
+    onError: (err) => {
+      setStatus((err as Error).message);
+    },
+  });
+
+  const importMut = useMutation({
+    mutationFn: importVaultPng,
+    onSuccess: async () => {
+      setStatus("Imported PNG into vault.");
+      await qc.invalidateQueries({ queryKey: ["vault-images"] });
+    },
+    onError: (err) => {
+      setStatus((err as Error).message);
+    },
+  });
+
+  function onGenerate(e: FormEvent) {
+    e.preventDefault();
+    if (!prompt.trim()) return;
+    setStatus("Generating (human-initiated)…");
+    const seedNum = seed.trim() ? Number(seed) : undefined;
+    generate.mutate({
+      prompt: prompt.trim(),
+      negativePrompt: negativePrompt.trim(),
+      seed: Number.isFinite(seedNum) ? seedNum : undefined,
+      n: 1,
+    });
+  }
+
+  function prefillFromCharacter(id: string) {
+    const c = (characters.data ?? []).find((x) => x.id === id);
+    if (!c) return;
+    if (c.tags) setPrompt(c.tags);
+    if (c.ucNegatives) setNegativePrompt(c.ucNegatives);
+  }
+
+  function onImportFile(file: File | null) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = String(reader.result ?? "");
+      const b64 = dataUrl.includes(",") ? dataUrl.split(",")[1]! : dataUrl;
+      setStatus("Importing…");
+      importMut.mutate({
+        pngBase64: b64,
+        prompt: prompt.trim() || undefined,
+        negativePrompt: negativePrompt.trim() || undefined,
+        seed: seed.trim() || undefined,
+      });
+    };
+    reader.readAsDataURL(file);
+  }
+
+  return (
+    <div className="stack-gap">
+      <section className="card">
+        <h2>Human generate (NovelAI)</h2>
+        <p className="hint">
+          One image per click. Server auto-saves into the vault. Requires{" "}
+          <code>AIGEN_NOVELAI_API_KEY</code>. Or import a PNG downloaded from NovelAI.
+        </p>
+        <form onSubmit={onGenerate} className="stack">
+          <label>
+            Prefill tags from character
+            <select
+              defaultValue=""
+              onChange={(e) => {
+                if (e.target.value) prefillFromCharacter(e.target.value);
+              }}
+            >
+              <option value="">—</option>
+              {(characters.data ?? []).map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Prompt
+            <textarea
+              rows={3}
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              required
+            />
+          </label>
+          <label>
+            UC / negative
+            <textarea
+              rows={2}
+              value={negativePrompt}
+              onChange={(e) => setNegativePrompt(e.target.value)}
+            />
+          </label>
+          <label>
+            Seed (optional)
+            <input
+              value={seed}
+              onChange={(e) => setSeed(e.target.value)}
+              placeholder="random if empty"
+            />
+          </label>
+          <div className="row wrap">
+            <button type="submit" disabled={generate.isPending}>
+              Generate (1 image)
+            </button>
+            <label className="file-btn">
+              Import PNG
+              <input
+                type="file"
+                accept="image/png"
+                hidden
+                onChange={(e) =>
+                  onImportFile(e.target.files?.[0] ?? null)
+                }
+              />
+            </label>
+          </div>
+        </form>
+        {status && <p className="hint">{status}</p>}
+      </section>
+
+      <section className="card">
+        <h2>Vault gallery</h2>
+        {images.isLoading && <p>Loading…</p>}
+        {images.isError && (
+          <p className="error">{(images.error as Error).message}</p>
+        )}
+        <div className="gallery-grid">
+          {(images.data ?? []).map((img) => (
+            <VaultThumb key={img.id} image={img} />
+          ))}
+        </div>
+        {images.data?.length === 0 && (
+          <p className="hint">No vault images yet.</p>
+        )}
+      </section>
+    </div>
+  );
+}
+
+function VaultThumb({ image }: { image: VaultImage }) {
+  const [url, setUrl] = useState<string | null>(null);
+  const [err, setErr] = useState("");
+
+  useEffect(() => {
+    let objectUrl: string | null = null;
+    let cancelled = false;
+    fetchVaultImageObjectUrl(image.id)
+      .then((u) => {
+        if (cancelled) {
+          URL.revokeObjectURL(u);
+          return;
+        }
+        objectUrl = u;
+        setUrl(u);
+      })
+      .catch((e) => setErr((e as Error).message));
+    return () => {
+      cancelled = true;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [image.id]);
+
+  return (
+    <figure className="vault-card">
+      {url ? (
+        <img src={url} alt={image.prompt || image.id} />
+      ) : (
+        <div className="vault-placeholder">{err || "…"}</div>
+      )}
+      <figcaption>
+        <span className="meta">{image.source}</span>
+        <p className="snippet">{image.prompt || "(no prompt)"}</p>
+        {image.seed ? <p className="meta">seed {image.seed}</p> : null}
+      </figcaption>
+    </figure>
   );
 }

@@ -18,7 +18,7 @@ if (ctx.tokenCreated) {
 
 console.log(`[aigen-studio] dataDir=${ctx.paths.root}`);
 console.log(
-  `[aigen-studio] NovelAI key: ${config.novelaiApiKey ? "configured" : "not set (OK for M1–M3)"}`,
+  `[aigen-studio] NovelAI key: ${config.novelaiApiKey ? "configured" : "not set (generate disabled; other features OK)"}`,
 );
 
 const server = serve(

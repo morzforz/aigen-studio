@@ -237,6 +237,60 @@ label {
   flex-wrap: wrap;
 }
 
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+  gap: 0.75rem;
+}
+
+.vault-card {
+  margin: 0;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+.vault-card img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+}
+
+.vault-placeholder {
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.vault-card figcaption {
+  padding: 0.5rem 0.6rem 0.65rem;
+}
+
+.file-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 0.9rem;
+  border-radius: 0.4rem;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  color: var(--text);
+  background: transparent;
+}
+
+select {
+  width: 100%;
+  padding: 0.5rem 0.65rem;
+  border-radius: 0.4rem;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+}
+
 .hint,
 .meta {
   color: var(--muted);

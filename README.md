@@ -108,6 +108,19 @@ Authorization: Bearer <token>
 
 Deterministic templates from your lore — no NovelAI network calls or image generation.
 
+## Image vault & generate (M4)
+
+**Gallery** tab: human **Generate (1 image)** via NovelAI (requires `AIGEN_NOVELAI_API_KEY`), or **Import PNG**. Images auto-save under `$AIGEN_DATA_DIR/vault/images/…` with SQLite index and PNG text-chunk metadata extract.
+
+```http
+POST /api/v1/nai/image/generate   # Bearer; n must be 1; 503 if no key
+GET  /api/v1/vault/images
+GET  /api/v1/vault/images/:id/file
+POST /api/v1/vault/images/import  # { pngBase64, prompt? }
+```
+
+No batch/unattended generate. App still boots without a NovelAI key.
+
 ## Current milestone
 
-See [`docs/ROADMAP.md`](docs/ROADMAP.md). **M3 story scaffolding** is implemented. Next: **M4 image path**.
+See [`docs/ROADMAP.md`](docs/ROADMAP.md). **M4 image path** is implemented. Next: **M5 libraries / feedback / LLM**.

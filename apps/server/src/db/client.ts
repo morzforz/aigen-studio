@@ -50,6 +50,22 @@ CREATE TABLE IF NOT EXISTS settings (
   created_at TEXT NOT NULL,
   updated_at TEXT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS vault_images (
+  id TEXT PRIMARY KEY NOT NULL,
+  relative_path TEXT NOT NULL,
+  prompt TEXT NOT NULL DEFAULT '',
+  negative_prompt TEXT NOT NULL DEFAULT '',
+  seed TEXT NOT NULL DEFAULT '',
+  model TEXT NOT NULL DEFAULT '',
+  width INTEGER,
+  height INTEGER,
+  source TEXT NOT NULL,
+  extracted_metadata_json TEXT NOT NULL DEFAULT '{}',
+  sha256 TEXT NOT NULL,
+  byte_size INTEGER NOT NULL,
+  created_at TEXT NOT NULL
+);
 `;
 
 export function openDatabase(paths: DataPaths): DbHandle {
