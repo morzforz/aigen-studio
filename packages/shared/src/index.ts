@@ -10,6 +10,10 @@ export const ApiPaths = {
   ready: `${API_V1}/ready`,
   notes: `${API_V1}/notes`,
   note: (id: string) => `${API_V1}/notes/${id}`,
+  characters: `${API_V1}/characters`,
+  character: (id: string) => `${API_V1}/characters/${id}`,
+  settings: `${API_V1}/settings`,
+  setting: (id: string) => `${API_V1}/settings/${id}`,
 } as const;
 
 export const healthResponseSchema = z.object({
@@ -44,6 +48,57 @@ export const noteListSchema = z.object({
   notes: z.array(noteSchema),
 });
 export type NoteList = z.infer<typeof noteListSchema>;
+
+/** Shared optional image-oriented fields (no vault/generate required). */
+const imageOrientedFields = {
+  tags: z.string().max(10_000).default(""),
+  ucNegatives: z.string().max(10_000).default(""),
+  refImagePath: z.string().max(2000).default(""),
+};
+
+export const characterWriteSchema = z.object({
+  name: z.string().min(1).max(500),
+  bio: z.string().max(100_000).default(""),
+  personality: z.string().max(100_000).default(""),
+  voiceStyle: z.string().max(50_000).default(""),
+  notes: z.string().max(100_000).default(""),
+  relationships: z.string().max(50_000).default(""),
+  ...imageOrientedFields,
+});
+export type CharacterWrite = z.infer<typeof characterWriteSchema>;
+
+export const characterSchema = characterWriteSchema.extend({
+  id: z.string().uuid(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+export type Character = z.infer<typeof characterSchema>;
+
+export const characterListSchema = z.object({
+  characters: z.array(characterSchema),
+});
+export type CharacterList = z.infer<typeof characterListSchema>;
+
+export const settingWriteSchema = z.object({
+  name: z.string().min(1).max(500),
+  description: z.string().max(100_000).default(""),
+  atmosphere: z.string().max(50_000).default(""),
+  notes: z.string().max(100_000).default(""),
+  ...imageOrientedFields,
+});
+export type SettingWrite = z.infer<typeof settingWriteSchema>;
+
+export const settingSchema = settingWriteSchema.extend({
+  id: z.string().uuid(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+export type Setting = z.infer<typeof settingSchema>;
+
+export const settingListSchema = z.object({
+  settings: z.array(settingSchema),
+});
+export type SettingList = z.infer<typeof settingListSchema>;
 
 export const apiErrorSchema = z.object({
   error: z.object({

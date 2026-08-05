@@ -41,6 +41,10 @@ body {
   padding: 1.5rem 1rem 3rem;
 }
 
+.page.wide {
+  max-width: 56rem;
+}
+
 .header h1 {
   margin: 0 0 0.25rem;
   font-size: 1.75rem;
@@ -104,6 +108,83 @@ button {
 button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+button.secondary {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+button.danger {
+  background: var(--err);
+}
+
+button.tab {
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border);
+}
+
+button.tab.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: transparent;
+}
+
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.split {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (min-width: 800px) {
+  .split {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.entity-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.entity-list li {
+  border-top: 1px solid var(--border);
+  padding: 0.85rem 0;
+}
+
+.entity-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  align-items: baseline;
+}
+
+.snippet {
+  margin: 0.35rem 0 0;
+  white-space: pre-wrap;
+}
+
+.snippet.muted,
+.muted {
+  color: var(--muted);
+  font-size: 0.92rem;
 }
 
 .hint,

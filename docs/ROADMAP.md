@@ -32,7 +32,7 @@ Stack and detailed design decisions belong in architecture/design docs once they
 
 | Field | Value |
 |-------|--------|
-| **Active milestone** | M2 — Lore repository (characters / settings) |
+| **Active milestone** | M3 — Story scaffolding (export-first) |
 | **Default sequence** | Lore-first (M0 → M1 → M2 → M3 → M4 → later) |
 | **Alternate path** | If lost images/settings dominate daily pain: after M1, do a thin vault/import slice before or in parallel with M2 (see [Sequencing notes](#sequencing-notes)) |
 
@@ -44,7 +44,7 @@ Stack and detailed design decisions belong in architecture/design docs once they
 |----|-----------|--------|------------|
 | M0 | Architecture sketch | Implemented | CONCEPT |
 | M1 | Application scaffold | Implemented | M0 |
-| M2 | Lore repository (characters / settings) | Not started | M1 |
+| M2 | Lore repository (characters / settings) | Implemented | M1 |
 | M3 | Story scaffolding (export-first) | Not started | M2 |
 | M4 | Image path (generate + vault + metadata) | Not started | M1 (M2 recommended) |
 | M5 | Libraries, feedback, and LLM assistance | Not started | M4 (M2/M3 for full dual-pillar value) |
@@ -109,8 +109,9 @@ Stack and detailed design decisions belong in architecture/design docs once they
 
 | | |
 |--|--|
-| **Status** | Not started |
+| **Status** | Implemented (2026-08-04) |
 | **Goal** | Durable server-side profiles for characters and settings—rich text first, image fields optional. |
+| **Artifact** | `/api/v1/characters`, `/api/v1/settings` · SQLite tables · web Characters/Settings UI · `apps/server/src/lore.test.ts` |
 
 **Deliverables**
 
@@ -122,10 +123,10 @@ Stack and detailed design decisions belong in architecture/design docs once they
 
 **Acceptance**
 
-- [ ] Characters (and settings) persist server-side across restarts
-- [ ] CRUD + basic search usable from the web client
-- [ ] Records can hold prose lore beyond image-only tags
-- [ ] No NovelAI API required for this milestone
+- [x] Characters (and settings) persist server-side across restarts
+- [x] CRUD + basic search usable from the web client
+- [x] Records can hold prose lore beyond image-only tags
+- [x] No NovelAI API required for this milestone
 
 **Why this order:** Shared spine for both pillars; no Anlas/ToS image path; immediate value for scattered lore.
 
@@ -261,6 +262,7 @@ Deferred:
 
 | Date | Change |
 |------|--------|
+| 2026-08-04 | **M2 Implemented:** characters + settings lore tables and authenticated CRUD/search under `/api/v1`; rich prose + optional image fields; web list/edit/search UI; Vitest on real handlers with restart persistence. Current focus → M3. |
 | 2026-08-04 | **M1 Implemented:** pnpm monorepo scaffold (Hono/SQLite server, Vite/React web, shared Zod); health + notes CRUD under `/api/v1`; auth-lite bearer; Vitest on real `createApp`; README run instructions. Current focus → M2. |
 | 2026-08-04 | **M0 Implemented:** architecture note at `docs/ARCHITECTURE.md` (Node/Hono/SQLite + Vite/React, storage, auth-lite, REST `/api/v1`, modules). Current focus → M1. |
 | 2026-08-04 | Initial roadmap from concept-level milestone discussion (lore-first sequence). |

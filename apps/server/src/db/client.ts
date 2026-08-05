@@ -22,6 +22,34 @@ CREATE TABLE IF NOT EXISTS notes (
   created_at TEXT NOT NULL,
   updated_at TEXT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS characters (
+  id TEXT PRIMARY KEY NOT NULL,
+  name TEXT NOT NULL,
+  bio TEXT NOT NULL DEFAULT '',
+  personality TEXT NOT NULL DEFAULT '',
+  voice_style TEXT NOT NULL DEFAULT '',
+  notes TEXT NOT NULL DEFAULT '',
+  relationships TEXT NOT NULL DEFAULT '',
+  tags TEXT NOT NULL DEFAULT '',
+  uc_negatives TEXT NOT NULL DEFAULT '',
+  ref_image_path TEXT NOT NULL DEFAULT '',
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS settings (
+  id TEXT PRIMARY KEY NOT NULL,
+  name TEXT NOT NULL,
+  description TEXT NOT NULL DEFAULT '',
+  atmosphere TEXT NOT NULL DEFAULT '',
+  notes TEXT NOT NULL DEFAULT '',
+  tags TEXT NOT NULL DEFAULT '',
+  uc_negatives TEXT NOT NULL DEFAULT '',
+  ref_image_path TEXT NOT NULL DEFAULT '',
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
 `;
 
 export function openDatabase(paths: DataPaths): DbHandle {

@@ -6,6 +6,8 @@ import { cors } from "hono/cors";
 import { API_V1 } from "@aigen-studio/shared";
 import type { ServerConfig } from "./config.js";
 import { openDatabase, type DbHandle } from "./db/client.js";
+import { charactersRoutes } from "./modules/lore/characters.js";
+import { settingsRoutes } from "./modules/lore/settings.js";
 import { notesRoutes } from "./modules/notes/routes.js";
 import { systemRoutes } from "./modules/system/routes.js";
 import { ensureDataLayout, resolveDataPaths, type DataPaths } from "./platform/files.js";
@@ -65,6 +67,8 @@ export function createApp(options: CreateAppOptions): AppContext {
   const api = new Hono<{ Variables: AppVariables }>();
   api.route("/", systemRoutes({ paths, db: dbHandle.db }));
   api.route("/notes", notesRoutes({ db: dbHandle.db }));
+  api.route("/characters", charactersRoutes({ db: dbHandle.db }));
+  api.route("/settings", settingsRoutes({ db: dbHandle.db }));
 
   app.route(API_V1, api);
 

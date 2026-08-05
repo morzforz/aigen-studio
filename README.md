@@ -87,6 +87,15 @@ packages/shared  # Zod schemas + /api/v1 path constants
 docs/         # CONCEPT, ARCHITECTURE, ROADMAP, RESEARCH
 ```
 
+## Lore repository (M2)
+
+With a saved app token, the web UI supports **Characters** and **Settings** (list, create, edit, search). API:
+
+- `GET/POST /api/v1/characters` · `GET/PUT/DELETE /api/v1/characters/:id` · `?q=` search
+- `GET/POST /api/v1/settings` · `GET/PUT/DELETE /api/v1/settings/:id` · `?q=` search
+
+Rich prose fields (bio, personality, notes, …) plus optional tags / UC / ref paths. No NovelAI key required.
+
 ## Current milestone
 
-See [`docs/ROADMAP.md`](docs/ROADMAP.md). M1 is the application scaffold (this README). Next: **M2 lore repository**.
+See [`docs/ROADMAP.md`](docs/ROADMAP.md). **M2 lore repository** is implemented. Next: **M3 story scaffolding**.
