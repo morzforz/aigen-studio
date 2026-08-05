@@ -15,6 +15,11 @@ export const ApiPaths = {
   settings: `${API_V1}/settings`,
   setting: (id: string) => `${API_V1}/settings/${id}`,
   scaffoldingCompose: `${API_V1}/scaffolding/compose`,
+  vaultImages: `${API_V1}/vault/images`,
+  vaultImage: (id: string) => `${API_V1}/vault/images/${id}`,
+  vaultImageFile: (id: string) => `${API_V1}/vault/images/${id}/file`,
+  vaultImageImport: `${API_V1}/vault/images/import`,
+  naiImageGenerate: `${API_V1}/nai/image/generate`,
 } as const;
 
 export const healthResponseSchema = z.object({
@@ -143,6 +148,57 @@ export const scaffoldingComposeResultSchema = z.object({
 export type ScaffoldingComposeResult = z.infer<
   typeof scaffoldingComposeResultSchema
 >;
+
+/** M4 — human-initiated single-image generate (n must be 1). */
+export const naiGenerateRequestSchema = z.object({
+  prompt: z.string().min(1).max(20_000),
+  negativePrompt: z.string().max(20_000).optional().default(""),
+  seed: z.number().int().optional(),
+  width: z.number().int().min(64).max(2048).optional(),
+  height: z.number().int().min(64).max(2048).optional(),
+  steps: z.number().int().min(1).max(50).optional(),
+  scale: z.number().min(1).max(30).optional(),
+  model: z.string().max(200).optional(),
+  /** Only 1 allowed — batch generation is forbidden */
+  n: z.literal(1).optional().default(1),
+});
+export type NaiGenerateRequest = z.infer<typeof naiGenerateRequestSchema>;
+
+export const vaultImageSchema = z.object({
+  id: z.string().uuid(),
+  relativePath: z.string(),
+  prompt: z.string(),
+  negativePrompt: z.string(),
+  seed: z.string(),
+  model: z.string(),
+  width: z.number().nullable(),
+  height: z.number().nullable(),
+  source: z.string(),
+  extractedMetadataJson: z.string(),
+  sha256: z.string(),
+  byteSize: z.number(),
+  createdAt: z.string(),
+});
+export type VaultImage = z.infer<typeof vaultImageSchema>;
+
+export const vaultImageListSchema = z.object({
+  images: z.array(vaultImageSchema),
+});
+export type VaultImageList = z.infer<typeof vaultImageListSchema>;
+
+export const naiGenerateResponseSchema = z.object({
+  image: vaultImageSchema,
+});
+export type NaiGenerateResponse = z.infer<typeof naiGenerateResponseSchema>;
+
+export const vaultImportRequestSchema = z.object({
+  pngBase64: z.string().min(1),
+  prompt: z.string().max(20_000).optional(),
+  negativePrompt: z.string().max(20_000).optional(),
+  seed: z.string().max(100).optional(),
+  model: z.string().max(200).optional(),
+});
+export type VaultImportRequest = z.infer<typeof vaultImportRequestSchema>;
 
 export const apiErrorSchema = z.object({
   error: z.object({

@@ -32,7 +32,7 @@ Stack and detailed design decisions belong in architecture/design docs once they
 
 | Field | Value |
 |-------|--------|
-| **Active milestone** | M4 — Image path (generate + vault + metadata) |
+| **Active milestone** | M5 — Libraries, feedback, and LLM assistance |
 | **Default sequence** | Lore-first (M0 → M1 → M2 → M3 → M4 → later) |
 | **Alternate path** | If lost images/settings dominate daily pain: after M1, do a thin vault/import slice before or in parallel with M2 (see [Sequencing notes](#sequencing-notes)) |
 
@@ -46,7 +46,7 @@ Stack and detailed design decisions belong in architecture/design docs once they
 | M1 | Application scaffold | Implemented | M0 |
 | M2 | Lore repository (characters / settings) | Implemented | M1 |
 | M3 | Story scaffolding (export-first) | Implemented | M2 |
-| M4 | Image path (generate + vault + metadata) | Not started | M1 (M2 recommended) |
+| M4 | Image path (generate + vault + metadata) | Implemented | M1 (M2 recommended) |
 | M5 | Libraries, feedback, and LLM assistance | Not started | M4 (M2/M3 for full dual-pillar value) |
 | L1 | NovelAI text-UI integration path | Deferred | Open decision (CONCEPT §5.9) |
 | L2 | Local imagegen / remote home GPU | Deferred | CONCEPT §5.10 |
@@ -163,8 +163,9 @@ Stack and detailed design decisions belong in architecture/design docs once they
 
 | | |
 |--|--|
-| **Status** | Not started |
+| **Status** | Implemented (2026-08-04) |
 | **Goal** | Human-initiated NovelAI image generation with durable auto-save and recoverable settings. |
+| **Artifact** | `POST /api/v1/nai/image/generate` · vault import/list/file · PNG tEXt metadata extract · Gallery tab · injectable NovelAI client for tests |
 
 **Deliverables** (prefer in this internal order)
 
@@ -176,12 +177,14 @@ Stack and detailed design decisions belong in architecture/design docs once they
 
 **Acceptance**
 
-- [ ] Human-only generate path works; no unattended NovelAI image jobs
-- [ ] Successful generations land in our vault with recoverable metadata when NovelAI embeds it
-- [ ] Gallery can browse vault items
-- [ ] Hard limitation (CONCEPT §6) is enforced in design and API surface
+- [x] Human-only generate path works; no unattended NovelAI image jobs
+- [x] Successful generations land in our vault with recoverable metadata when NovelAI embeds it
+- [x] Gallery can browse vault items
+- [x] Hard limitation (CONCEPT §6) is enforced in design and API surface
 
 **Depends on:** M1 required; M2 strongly recommended before “compose from character.”
+
+**Notes:** Metadata extract implements ordinary PNG **tEXt/zTXt/iTXt** (fixture-proven). Stealth alpha pnginfo deferred. Generate uses injectable client in tests; live key via `AIGEN_NOVELAI_API_KEY`. Batch `n≠1` rejected. Character tag prefill on Generate form.
 
 ---
 
@@ -263,6 +266,7 @@ Deferred:
 
 | Date | Change |
 |------|--------|
+| 2026-08-04 | **M4 Implemented:** human-only NovelAI generate proxy + vault auto-save, PNG text-chunk metadata extract, gallery/import UI, injectable NovelAI client for tests. Current focus → M5. |
 | 2026-08-04 | **M3 Implemented:** story scaffolding compose from selected lore → memory / lorebook / system-prompt drafts; `POST /api/v1/scaffolding/compose`; web Scaffold tab with copy + download export; no NovelAI image jobs. Current focus → M4. |
 | 2026-08-04 | **M2 Implemented:** characters + settings lore tables and authenticated CRUD/search under `/api/v1`; rich prose + optional image fields; web list/edit/search UI; Vitest on real handlers with restart persistence. Current focus → M3. |
 | 2026-08-04 | **M1 Implemented:** pnpm monorepo scaffold (Hono/SQLite server, Vite/React web, shared Zod); health + notes CRUD under `/api/v1`; auth-lite bearer; Vitest on real `createApp`; README run instructions. Current focus → M2. |

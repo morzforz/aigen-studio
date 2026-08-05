@@ -8,9 +8,15 @@ import type { ServerConfig } from "./config.js";
 import { openDatabase, type DbHandle } from "./db/client.js";
 import { charactersRoutes } from "./modules/lore/characters.js";
 import { settingsRoutes } from "./modules/lore/settings.js";
+import {
+  createHttpNovelAIClient,
+  type NovelAIImageClient,
+} from "./modules/nai_image/client.js";
+import { naiImageRoutes } from "./modules/nai_image/routes.js";
 import { notesRoutes } from "./modules/notes/routes.js";
 import { scaffoldingRoutes } from "./modules/scaffolding/routes.js";
 import { systemRoutes } from "./modules/system/routes.js";
+import { vaultRoutes } from "./modules/vault/routes.js";
 import { ensureDataLayout, resolveDataPaths, type DataPaths } from "./platform/files.js";
 import { loadOrCreateAppToken } from "./platform/secrets.js";
 import type { AppVariables } from "./types.js";
@@ -29,13 +35,18 @@ export type AppContext = {
 
 export type CreateAppOptions = {
   config: ServerConfig;
-  /** Force a known token (tests); still respects config.appTokenOverride if set via load */
+  /** Force a known token (tests) */
   appToken?: string;
+  /**
+   * Injectable NovelAI image client for tests.
+   * If omitted: HTTP client when config.novelaiApiKey set, else null (generate disabled).
+   */
+  novelAIClient?: NovelAIImageClient | null;
 };
 
 /**
  * Build the real application: data layout, SQLite, auth token, routes.
- * Does not listen on a port.
+ * Does not listen on a port. Does not require NovelAI key to boot.
  */
 export function createApp(options: CreateAppOptions): AppContext {
   const { config } = options;
@@ -48,6 +59,15 @@ export function createApp(options: CreateAppOptions): AppContext {
 
   const dbHandle = openDatabase(paths);
 
+  let novelAIClient: NovelAIImageClient | null;
+  if (options.novelAIClient !== undefined) {
+    novelAIClient = options.novelAIClient;
+  } else if (config.novelaiApiKey) {
+    novelAIClient = createHttpNovelAIClient(config.novelaiApiKey);
+  } else {
+    novelAIClient = null;
+  }
+
   const app = new Hono<{ Variables: AppVariables }>();
 
   app.use(
@@ -59,7 +79,6 @@ export function createApp(options: CreateAppOptions): AppContext {
     }),
   );
 
-  // Make token available to auth middleware via context
   app.use("*", async (c, next) => {
     c.set("appToken", tokenResult.token);
     await next();
@@ -71,6 +90,15 @@ export function createApp(options: CreateAppOptions): AppContext {
   api.route("/characters", charactersRoutes({ db: dbHandle.db }));
   api.route("/settings", settingsRoutes({ db: dbHandle.db }));
   api.route("/scaffolding", scaffoldingRoutes({ db: dbHandle.db }));
+  api.route("/vault", vaultRoutes({ db: dbHandle.db, paths }));
+  api.route(
+    "/nai/image",
+    naiImageRoutes({
+      db: dbHandle.db,
+      paths,
+      client: novelAIClient,
+    }),
+  );
 
   app.route(API_V1, api);
 
