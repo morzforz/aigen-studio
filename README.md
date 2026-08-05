@@ -13,15 +13,27 @@ Full-stack app for NovelAI **image** workflows plus a durable **lore repository*
 pnpm install
 ```
 
+## Run (recommended)
+
+From the repo root — installs deps if needed, then starts API + web:
+
+```bash
+./scripts/run-dev.sh
+# or:
+pnpm start
+```
+
+Open **http://127.0.0.1:5173**. API defaults to **http://127.0.0.1:8787**. Stop with Ctrl+C.
+
 ## Development
 
-Starts the API server (default `http://127.0.0.1:8787`) and Vite web client (`http://127.0.0.1:5173`) together. The Vite dev server proxies `/api` to the API.
+Same process as above without the install/wrapper:
 
 ```bash
 pnpm dev
 ```
 
-Open **http://127.0.0.1:5173**. On first server start a bearer **app token** is generated under the data directory and printed in the server log.
+The Vite dev server proxies `/api` to the API. On first server start a bearer **app token** is generated under the data directory and printed in the server log.
 
 ### App token
 
