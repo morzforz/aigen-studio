@@ -9,6 +9,8 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 CONCEPT="$ROOT/docs/CONCEPT.md"
 INDEX="$ROOT/INDEX.md"
 RESEARCH="$ROOT/docs/RESEARCH.md"
+ARCHITECTURE="$ROOT/docs/ARCHITECTURE.md"
+ROADMAP="$ROOT/docs/ROADMAP.md"
 fail=0
 
 assert_file() {
@@ -47,6 +49,8 @@ assert_no_grep() {
 assert_file "$CONCEPT"
 assert_file "$INDEX"
 assert_file "$RESEARCH"
+assert_file "$ARCHITECTURE"
+assert_file "$ROADMAP"
 
 echo "=== Product rename ==="
 assert_grep "CONCEPT title is Aigen Studio" '^# Aigen Studio' "$CONCEPT"
@@ -79,6 +83,19 @@ assert_grep "CONCEPT HARD LIMITATION" 'HARD LIMITATION' "$CONCEPT"
 assert_grep "CONCEPT human-initiated image" 'human-initiated' "$CONCEPT"
 assert_grep "CONCEPT auto-save / vault goal" 'auto-save|vault' "$CONCEPT"
 assert_grep "RESEARCH human-initiated image policy" 'human-initiated only' "$RESEARCH"
+
+echo "=== Architecture (M0) indexed and scaffold-ready ==="
+assert_grep "INDEX lists ARCHITECTURE.md" 'docs/ARCHITECTURE\.md' "$INDEX"
+assert_grep "ARCHITECTURE title" '^# Aigen Studio — Architecture' "$ARCHITECTURE"
+assert_grep "ARCHITECTURE stack (server/client)" 'Hono|Node\.js|Vite|React|SQLite' "$ARCHITECTURE"
+assert_grep "ARCHITECTURE storage layout" 'AIGEN_DATA_DIR|vault/images' "$ARCHITECTURE"
+assert_grep "ARCHITECTURE auth-lite" 'Bearer|app bearer token|app-token' "$ARCHITECTURE"
+assert_grep "ARCHITECTURE API shape" '/api/v1|REST' "$ARCHITECTURE"
+assert_grep "ARCHITECTURE module boundaries" 'lore|scaffolding|vault|nai_image' "$ARCHITECTURE"
+assert_grep "ARCHITECTURE human-initiated image rule" 'human-initiated' "$ARCHITECTURE"
+assert_grep "ARCHITECTURE non-decisions section" 'Non-decisions|text-UI|local imagegen|Pencil' "$ARCHITECTURE"
+assert_grep "ROADMAP M0 Implemented" 'M0.*Implemented|Architecture sketch \| Implemented' "$ROADMAP"
+assert_grep "ROADMAP current focus M1" 'M1 — Application scaffold' "$ROADMAP"
 
 if [[ "$fail" -ne 0 ]]; then
   echo

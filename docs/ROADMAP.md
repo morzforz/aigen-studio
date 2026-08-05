@@ -1,7 +1,7 @@
 # Aigen Studio — Roadmap
 
 **Status:** Living document — update when requirements change or milestones complete  
-**Related:** [CONCEPT.md](./CONCEPT.md) · [RESEARCH.md](./RESEARCH.md) · [INDEX.md](../INDEX.md)
+**Related:** [CONCEPT.md](./CONCEPT.md) · [ARCHITECTURE.md](./ARCHITECTURE.md) · [RESEARCH.md](./RESEARCH.md) · [INDEX.md](../INDEX.md)
 
 This roadmap turns [CONCEPT.md](./CONCEPT.md) into an ordered build path. It is **not** a product concept and does not restate architecture vocabulary; outcomes and hard rules live in CONCEPT.
 
@@ -32,7 +32,7 @@ Stack and detailed design decisions belong in architecture/design docs once they
 
 | Field | Value |
 |-------|--------|
-| **Active milestone** | M0 — Architecture sketch |
+| **Active milestone** | M1 — Application scaffold |
 | **Default sequence** | Lore-first (M0 → M1 → M2 → M3 → M4 → later) |
 | **Alternate path** | If lost images/settings dominate daily pain: after M1, do a thin vault/import slice before or in parallel with M2 (see [Sequencing notes](#sequencing-notes)) |
 
@@ -42,7 +42,7 @@ Stack and detailed design decisions belong in architecture/design docs once they
 
 | ID | Milestone | Status | Depends on |
 |----|-----------|--------|------------|
-| M0 | Architecture sketch | Not started | CONCEPT |
+| M0 | Architecture sketch | Implemented | CONCEPT |
 | M1 | Application scaffold | Not started | M0 |
 | M2 | Lore repository (characters / settings) | Not started | M1 |
 | M3 | Story scaffolding (export-first) | Not started | M2 |
@@ -59,8 +59,9 @@ Stack and detailed design decisions belong in architecture/design docs once they
 
 | | |
 |--|--|
-| **Status** | Not started |
+| **Status** | Implemented (2026-08-04) |
 | **Goal** | Lock only the decisions needed to code without thrashing. |
+| **Artifact** | [`docs/ARCHITECTURE.md`](./ARCHITECTURE.md) |
 
 **Deliverables**
 
@@ -74,9 +75,9 @@ Stack and detailed design decisions belong in architecture/design docs once they
 
 **Acceptance**
 
-- [ ] Architecture doc exists and is listed in `INDEX.md`
-- [ ] Stack and storage choices are concrete enough to scaffold M1
-- [ ] Hard rule restated: human-initiated NovelAI **image** generation only
+- [x] Architecture doc exists and is listed in `INDEX.md`
+- [x] Stack and storage choices are concrete enough to scaffold M1
+- [x] Hard rule restated: human-initiated NovelAI **image** generation only
 
 ---
 
@@ -259,4 +260,5 @@ Deferred:
 
 | Date | Change |
 |------|--------|
+| 2026-08-04 | **M0 Implemented:** architecture note at `docs/ARCHITECTURE.md` (Node/Hono/SQLite + Vite/React, storage, auth-lite, REST `/api/v1`, modules). Current focus → M1. |
 | 2026-08-04 | Initial roadmap from concept-level milestone discussion (lore-first sequence). |
