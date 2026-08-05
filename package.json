@@ -1,0 +1,18 @@
+{
+  "name": "aigen-studio",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Aigen Studio — NovelAI image workflows + lore repository and story scaffolding",
+  "packageManager": "pnpm@9.15.0",
+  "scripts": {
+    "start": "./scripts/run-dev.sh",
+    "dev": "pnpm -r --parallel --filter @aigen-studio/server --filter @aigen-studio/web dev",
+    "build": "pnpm -r --filter @aigen-studio/shared --filter @aigen-studio/server --filter @aigen-studio/web build",
+    "test": "pnpm --filter @aigen-studio/server test",
+    "auth:show": "pnpm --filter @aigen-studio/server auth:show",
+    "typecheck": "pnpm -r typecheck"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

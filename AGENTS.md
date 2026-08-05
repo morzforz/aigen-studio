@@ -45,6 +45,16 @@ Agents **must** follow this workflow. Direct commits to `main` are forbidden exc
   `fix: prevent null pointer on missing config`  
   `chore: update INDEX.md with new systems doc`
 
+### Branch hygiene (proactive merge to `main`)
+
+Agents **must** maintain branch hygiene. Do not leave finished feature/fix/chore branches sitting unmerged “for later.”
+
+- **When work is complete, merge it.** As soon as you are **certain** a feature, fix, docs update, or other branch is done—validation green, acceptance criteria met (including roadmap status if applicable), no intentional WIP left—**merge back to `main` in the same session** (or open a PR if that is the active review flow). Do not wait for the user to ask “please merge.”
+- **Certainty means:** the branch’s goal is finished, tests/validation pass on the branch, the tree is clean (or only unrelated untracked noise), and you would not expect further commits on that branch for the same unit of work.
+- **Do not merge** if the work is partial, failing validation, blocked on a user decision, or still marked WIP. In those cases stay on the branch and say what remains.
+- Prefer **one logical unit of work per branch**, then merge and start the next unit from updated `main`. Stacking many completed-but-unmerged branches is discouraged.
+- After merge, delete the local feature branch (`git branch -d …`) so the default checkout for the next task is a clean `main`.
+
 ### Merging Back to `main`
 
 Agents do **not** force-push or rewrite `main` history.
@@ -56,14 +66,14 @@ Preferred path (when the environment supports it):
 4. Re-run validation on `main` after the merge.
 5. Only then delete the feature branch: `git branch -d feature/<name>`
 
-If a pull-request / code-review flow is active in the repo, prefer opening a PR instead of a local merge. Agents should still leave the branch in a review-ready state (validation green, clear commit messages, no WIP commits).
+If a pull-request / code-review flow is active in the repo, prefer opening a PR instead of a local merge—but still do so **promptly when the work is complete**, not as an open-ended deferral. Agents should leave the branch in a review-ready state (validation green, clear commit messages, no WIP commits) and open the PR (or merge locally when no PR flow is required) without waiting for an extra merge prompt.
 
 ### Conflict & Safety Rules
 
 - Never resolve merge conflicts by blindly accepting “ours” or “theirs” on files that contain critical identifiers, configuration, generated references, binary data, or complex structured formats that text merges can corrupt. Prefer regenerating or carefully reconciling such files after the textual conflict is cleaned.
 - If a conflict touches complex structured files (configs, schemas, serialized data), treat it as a high-risk change: re-validate thoroughly before considering the merge done.
 - Agents must not `git push --force` to `main` or to any shared branch.
-- When in doubt, leave the feature branch unmerged and document the exact state + remaining work in the commit message or a short note in `INDEX.md` / the relevant design doc.
+- When in doubt **about correctness or conflicts**, leave the feature branch unmerged and document the exact state + remaining work in the commit message or a short note in `INDEX.md` / the relevant design doc. “When in doubt” is about risk and unfinished work—not permission to skip merging work you already know is complete.
 
 ### LFS & Binary Hygiene
 
@@ -79,6 +89,16 @@ Before making design, architecture, or other high-level decisions, agents **must
 - If `INDEX.md` references any files that do not yet exist, the agent should create minimal stubs for those files (with a clear header describing their intended purpose) rather than inventing content or treating their absence as a blocker.
 - Documents referenced in `INDEX.md` should be maintained and kept up to date as the project progresses. When an agent makes a lasting design, architecture, or systems decision, it should update the relevant indexed document (or create/update an entry in `INDEX.md` if a new document is warranted).
 - Do not invent design decisions that are already documented elsewhere — prefer the indexed sources.
+
+### Roadmap maintenance (mandatory)
+
+`docs/ROADMAP.md` is the living build plan (milestones, order, current focus). Agents **must** keep it honest:
+
+1. **Consult the roadmap** when planning or starting non-trivial implementation work so effort follows agreed sequencing (or an explicit, documented deviation).
+2. **Mark milestones Implemented** when that milestone’s acceptance criteria in `docs/ROADMAP.md` are met—update status, check off acceptance items, refresh **Current focus**, and add a one-line **Changelog** entry (with date). Do not mark Implemented for a partial spike that fails acceptance.
+3. **Update the roadmap when requirements change**—reprioritize, split/merge, add, defer, or cancel milestones; adjust **Current focus** and **Changelog**. Do not leave the roadmap describing a plan the project has abandoned.
+4. **Do not invent a parallel tracker** (ad-hoc TODO dumps that replace the roadmap). Follow-ups for an in-flight milestone may be bullets under that milestone; product-level sequencing stays in `docs/ROADMAP.md`.
+5. Product **outcomes and hard rules** remain in `docs/CONCEPT.md`; the roadmap does not supersede CONCEPT. If a milestone conflicts with CONCEPT, update CONCEPT (or the milestone) deliberately and keep both consistent.
 
 ### Read-Only Documents
 
@@ -105,5 +125,6 @@ A change is complete only when:
 - Project validation passes
 - Style and convention rules are followed
 - No known failure patterns remain unaddressed
+- If the change completes a roadmap milestone (or changes sequencing/requirements), `docs/ROADMAP.md` is updated accordingly (see **Roadmap maintenance**)
 
 Keep this `AGENTS.md` updated whenever project conventions, tooling, or preferred patterns change. It is the single source of truth for agents working on this repository.

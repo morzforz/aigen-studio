@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+
+# Build
+dist/
+build/
+*.tsbuildinfo
+
+# Local data (vault, SQLite, secrets)
+data/
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# OS / IDE
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs / coverage
+logs/
+*.log
+coverage/
+
+# Vite
+apps/web/dist/
