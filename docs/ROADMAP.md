@@ -32,7 +32,7 @@ Stack and detailed design decisions belong in architecture/design docs once they
 
 | Field | Value |
 |-------|--------|
-| **Active milestone** | M3 — Story scaffolding (export-first) |
+| **Active milestone** | M4 — Image path (generate + vault + metadata) |
 | **Default sequence** | Lore-first (M0 → M1 → M2 → M3 → M4 → later) |
 | **Alternate path** | If lost images/settings dominate daily pain: after M1, do a thin vault/import slice before or in parallel with M2 (see [Sequencing notes](#sequencing-notes)) |
 
@@ -45,7 +45,7 @@ Stack and detailed design decisions belong in architecture/design docs once they
 | M0 | Architecture sketch | Implemented | CONCEPT |
 | M1 | Application scaffold | Implemented | M0 |
 | M2 | Lore repository (characters / settings) | Implemented | M1 |
-| M3 | Story scaffolding (export-first) | Not started | M2 |
+| M3 | Story scaffolding (export-first) | Implemented | M2 |
 | M4 | Image path (generate + vault + metadata) | Not started | M1 (M2 recommended) |
 | M5 | Libraries, feedback, and LLM assistance | Not started | M4 (M2/M3 for full dual-pillar value) |
 | L1 | NovelAI text-UI integration path | Deferred | Open decision (CONCEPT §5.9) |
@@ -136,8 +136,9 @@ Stack and detailed design decisions belong in architecture/design docs once they
 
 | | |
 |--|--|
-| **Status** | Not started |
+| **Status** | Implemented (2026-08-04) |
 | **Goal** | Easy path to assemble NovelAI-oriented story setup from saved lore—without a custom text UI. |
+| **Artifact** | `POST /api/v1/scaffolding/compose` · pure `composeFromLore` · web Scaffold tab (copy/download) · `apps/server/src/scaffolding.test.ts` |
 
 **Deliverables**
 
@@ -150,9 +151,9 @@ Stack and detailed design decisions belong in architecture/design docs once they
 
 **Acceptance**
 
-- [ ] User can select lore entities and produce memory / lorebook / system-prompt drafts
-- [ ] Output is copy/exportable without NovelAI text-UI integration
-- [ ] Scaffolding does not submit NovelAI **image** jobs
+- [x] User can select lore entities and produce memory / lorebook / system-prompt drafts
+- [x] Output is copy/exportable without NovelAI text-UI integration
+- [x] Scaffolding does not submit NovelAI **image** jobs
 
 **Out of scope for M3:** Replacing or wrapping NovelAI’s text editor; extensions/userscripts/scripting (see L1).
 
@@ -262,6 +263,7 @@ Deferred:
 
 | Date | Change |
 |------|--------|
+| 2026-08-04 | **M3 Implemented:** story scaffolding compose from selected lore → memory / lorebook / system-prompt drafts; `POST /api/v1/scaffolding/compose`; web Scaffold tab with copy + download export; no NovelAI image jobs. Current focus → M4. |
 | 2026-08-04 | **M2 Implemented:** characters + settings lore tables and authenticated CRUD/search under `/api/v1`; rich prose + optional image fields; web list/edit/search UI; Vitest on real handlers with restart persistence. Current focus → M3. |
 | 2026-08-04 | **M1 Implemented:** pnpm monorepo scaffold (Hono/SQLite server, Vite/React web, shared Zod); health + notes CRUD under `/api/v1`; auth-lite bearer; Vitest on real `createApp`; README run instructions. Current focus → M2. |
 | 2026-08-04 | **M0 Implemented:** architecture note at `docs/ARCHITECTURE.md` (Node/Hono/SQLite + Vite/React, storage, auth-lite, REST `/api/v1`, modules). Current focus → M1. |

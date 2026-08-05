@@ -9,6 +9,7 @@ import { openDatabase, type DbHandle } from "./db/client.js";
 import { charactersRoutes } from "./modules/lore/characters.js";
 import { settingsRoutes } from "./modules/lore/settings.js";
 import { notesRoutes } from "./modules/notes/routes.js";
+import { scaffoldingRoutes } from "./modules/scaffolding/routes.js";
 import { systemRoutes } from "./modules/system/routes.js";
 import { ensureDataLayout, resolveDataPaths, type DataPaths } from "./platform/files.js";
 import { loadOrCreateAppToken } from "./platform/secrets.js";
@@ -69,6 +70,7 @@ export function createApp(options: CreateAppOptions): AppContext {
   api.route("/notes", notesRoutes({ db: dbHandle.db }));
   api.route("/characters", charactersRoutes({ db: dbHandle.db }));
   api.route("/settings", settingsRoutes({ db: dbHandle.db }));
+  api.route("/scaffolding", scaffoldingRoutes({ db: dbHandle.db }));
 
   app.route(API_V1, api);
 

@@ -96,6 +96,18 @@ With a saved app token, the web UI supports **Characters** and **Settings** (lis
 
 Rich prose fields (bio, personality, notes, …) plus optional tags / UC / ref paths. No NovelAI key required.
 
+## Story scaffolding (M3)
+
+**Scaffold** tab: select characters/settings → **Compose drafts** → view **memory**, **lorebook** entries, and **system prompt**. Copy to clipboard or download `.txt` / `.json`.
+
+```http
+POST /api/v1/scaffolding/compose
+Authorization: Bearer <token>
+{ "characterIds": ["…"], "settingIds": ["…"], "storyTitle": "optional" }
+```
+
+Deterministic templates from your lore — no NovelAI network calls or image generation.
+
 ## Current milestone
 
-See [`docs/ROADMAP.md`](docs/ROADMAP.md). **M2 lore repository** is implemented. Next: **M3 story scaffolding**.
+See [`docs/ROADMAP.md`](docs/ROADMAP.md). **M3 story scaffolding** is implemented. Next: **M4 image path**.

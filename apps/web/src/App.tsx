@@ -1,7 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, type FormEvent } from "react";
-import type { Character, CharacterWrite, Setting, SettingWrite } from "@aigen-studio/shared";
+import type {
+  Character,
+  CharacterWrite,
+  ScaffoldingComposeResult,
+  Setting,
+  SettingWrite,
+} from "@aigen-studio/shared";
 import {
+  composeScaffolding,
   createCharacter,
   createSetting,
   deleteCharacter,
@@ -15,7 +22,7 @@ import {
   updateSetting,
 } from "./api";
 
-type Tab = "characters" | "settings";
+type Tab = "characters" | "settings" | "scaffold";
 
 const emptyCharacter = (): CharacterWrite => ({
   name: "",
@@ -69,7 +76,9 @@ export function App() {
     <div className="page wide">
       <header className="header">
         <h1>Aigen Studio</h1>
-        <p className="tagline">Lore repository — characters &amp; settings</p>
+        <p className="tagline">
+          Lore repository &amp; story scaffolding (memory / lorebook / system prompt)
+        </p>
       </header>
 
       <section className="card">
@@ -121,40 +130,49 @@ export function App() {
         >
           Settings
         </button>
+        <button
+          type="button"
+          className={tab === "scaffold" ? "tab active" : "tab"}
+          onClick={() => setTab("scaffold")}
+        >
+          Scaffold
+        </button>
       </nav>
 
-      <section className="card">
-        <form onSubmit={applySearch} className="row">
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder={
-              tab === "characters"
-                ? "Search characters (name, bio, …)"
-                : "Search settings (name, description, …)"
-            }
-            disabled={!tokenSaved}
-          />
-          <button type="submit" disabled={!tokenSaved}>
-            Search
-          </button>
-          {searchApplied ? (
-            <button
-              type="button"
-              className="secondary"
-              onClick={() => {
-                setSearch("");
-                setSearchApplied("");
-              }}
-            >
-              Clear
+      {tab !== "scaffold" && (
+        <section className="card">
+          <form onSubmit={applySearch} className="row">
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={
+                tab === "characters"
+                  ? "Search characters (name, bio, …)"
+                  : "Search settings (name, description, …)"
+              }
+              disabled={!tokenSaved}
+            />
+            <button type="submit" disabled={!tokenSaved}>
+              Search
             </button>
-          ) : null}
-        </form>
-      </section>
+            {searchApplied ? (
+              <button
+                type="button"
+                className="secondary"
+                onClick={() => {
+                  setSearch("");
+                  setSearchApplied("");
+                }}
+              >
+                Clear
+              </button>
+            ) : null}
+          </form>
+        </section>
+      )}
 
       {!tokenSaved && (
-        <p className="hint">Save an app token to use the lore repository.</p>
+        <p className="hint">Save an app token to use lore and scaffolding.</p>
       )}
 
       {tokenSaved && tab === "characters" && (
@@ -163,6 +181,7 @@ export function App() {
       {tokenSaved && tab === "settings" && (
         <SettingsPanel search={searchApplied} />
       )}
+      {tokenSaved && tab === "scaffold" && <ScaffoldPanel />}
     </div>
   );
 }
@@ -543,5 +562,245 @@ function SettingsPanel({ search }: { search: string }) {
         {list.data?.length === 0 && <p className="hint">No settings yet.</p>}
       </section>
     </div>
+  );
+}
+
+function toggleId(ids: string[], id: string): string[] {
+  return ids.includes(id) ? ids.filter((x) => x !== id) : [...ids, id];
+}
+
+function downloadText(filename: string, content: string, mime: string) {
+  const blob = new Blob([content], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function ScaffoldPanel() {
+  const [characterIds, setCharacterIds] = useState<string[]>([]);
+  const [settingIds, setSettingIds] = useState<string[]>([]);
+  const [storyTitle, setStoryTitle] = useState("");
+  const [draft, setDraft] = useState<ScaffoldingComposeResult | null>(null);
+  const [copyMsg, setCopyMsg] = useState("");
+
+  const characters = useQuery({
+    queryKey: ["characters", ""],
+    queryFn: () => listCharacters(),
+    retry: false,
+  });
+  const settings = useQuery({
+    queryKey: ["settings", ""],
+    queryFn: () => listSettings(),
+    retry: false,
+  });
+
+  const compose = useMutation({
+    mutationFn: composeScaffolding,
+    onSuccess: (result) => {
+      setDraft(result);
+      setCopyMsg("");
+    },
+  });
+
+  function onCompose(e: FormEvent) {
+    e.preventDefault();
+    if (characterIds.length === 0 && settingIds.length === 0) return;
+    compose.mutate({
+      characterIds,
+      settingIds,
+      storyTitle: storyTitle.trim() || undefined,
+    });
+  }
+
+  async function copyText(label: string, text: string) {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopyMsg(`Copied ${label}`);
+    } catch {
+      setCopyMsg(`Clipboard failed — use Download instead`);
+    }
+  }
+
+  const canCompose = characterIds.length > 0 || settingIds.length > 0;
+
+  return (
+    <div className="stack-gap">
+      <section className="card">
+        <h2>Story scaffolding</h2>
+        <p className="hint">
+          Select lore entities, compose NovelAI-oriented memory, lorebook entries, and a
+          system prompt. Export via copy or download — no NovelAI text-UI or image generate.
+        </p>
+        <form onSubmit={onCompose} className="stack">
+          <label>
+            Story title (optional)
+            <input
+              value={storyTitle}
+              onChange={(e) => setStoryTitle(e.target.value)}
+              placeholder="e.g. Compass Lost"
+            />
+          </label>
+
+          <div className="split">
+            <div>
+              <h3 className="subhead">Characters</h3>
+              {(characters.data ?? []).map((c) => (
+                <label key={c.id} className="check-row">
+                  <input
+                    type="checkbox"
+                    checked={characterIds.includes(c.id)}
+                    onChange={() =>
+                      setCharacterIds((ids) => toggleId(ids, c.id))
+                    }
+                  />
+                  <span>{c.name}</span>
+                </label>
+              ))}
+              {characters.data?.length === 0 && (
+                <p className="hint">No characters — create some first.</p>
+              )}
+            </div>
+            <div>
+              <h3 className="subhead">Settings</h3>
+              {(settings.data ?? []).map((s) => (
+                <label key={s.id} className="check-row">
+                  <input
+                    type="checkbox"
+                    checked={settingIds.includes(s.id)}
+                    onChange={() => setSettingIds((ids) => toggleId(ids, s.id))}
+                  />
+                  <span>{s.name}</span>
+                </label>
+              ))}
+              {settings.data?.length === 0 && (
+                <p className="hint">No settings — create some first.</p>
+              )}
+            </div>
+          </div>
+
+          <button type="submit" disabled={!canCompose || compose.isPending}>
+            Compose drafts
+          </button>
+          {compose.isError && (
+            <p className="error">{(compose.error as Error).message}</p>
+          )}
+        </form>
+      </section>
+
+      {draft && (
+        <section className="card">
+          <h2>Drafts — {draft.storyTitle}</h2>
+          <div className="row wrap">
+            <button
+              type="button"
+              className="secondary"
+              onClick={() => copyText("plain text", draft.plainText)}
+            >
+              Copy all (plain)
+            </button>
+            <button
+              type="button"
+              className="secondary"
+              onClick={() =>
+                downloadText(
+                  `${slug(draft.storyTitle)}-scaffold.txt`,
+                  draft.plainText,
+                  "text/plain;charset=utf-8",
+                )
+              }
+            >
+              Download .txt
+            </button>
+            <button
+              type="button"
+              className="secondary"
+              onClick={() =>
+                downloadText(
+                  `${slug(draft.storyTitle)}-scaffold.json`,
+                  JSON.stringify(draft, null, 2),
+                  "application/json",
+                )
+              }
+            >
+              Download .json
+            </button>
+          </div>
+          {copyMsg && <p className="ok">{copyMsg}</p>}
+
+          <DraftBlock
+            title="Memory"
+            text={draft.memory}
+            onCopy={() => copyText("memory", draft.memory)}
+          />
+          <div className="draft-block">
+            <div className="entity-head">
+              <h3 className="subhead">Lorebook ({draft.lorebook.length})</h3>
+              <button
+                type="button"
+                className="secondary"
+                onClick={() =>
+                  copyText(
+                    "lorebook JSON",
+                    JSON.stringify(draft.lorebook, null, 2),
+                  )
+                }
+              >
+                Copy JSON
+              </button>
+            </div>
+            {draft.lorebook.map((e) => (
+              <div key={e.sourceId} className="lorebook-entry">
+                <strong>
+                  {e.keys}{" "}
+                  <span className="meta">
+                    ({e.sourceType})
+                  </span>
+                </strong>
+                <pre className="draft-pre">{e.text}</pre>
+              </div>
+            ))}
+          </div>
+          <DraftBlock
+            title="System prompt"
+            text={draft.systemPrompt}
+            onCopy={() => copyText("system prompt", draft.systemPrompt)}
+          />
+        </section>
+      )}
+    </div>
+  );
+}
+
+function DraftBlock({
+  title,
+  text,
+  onCopy,
+}: {
+  title: string;
+  text: string;
+  onCopy: () => void;
+}) {
+  return (
+    <div className="draft-block">
+      <div className="entity-head">
+        <h3 className="subhead">{title}</h3>
+        <button type="button" className="secondary" onClick={onCopy}>
+          Copy
+        </button>
+      </div>
+      <pre className="draft-pre">{text}</pre>
+    </div>
+  );
+}
+
+function slug(title: string): string {
+  return (
+    title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "") || "story"
   );
 }

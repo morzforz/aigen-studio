@@ -8,6 +8,7 @@ import {
   healthResponseSchema,
   noteListSchema,
   noteSchema,
+  scaffoldingComposeResultSchema,
   settingListSchema,
   settingSchema,
   type Character,
@@ -15,6 +16,8 @@ import {
   type HealthResponse,
   type Note,
   type NoteCreate,
+  type ScaffoldingComposeRequest,
+  type ScaffoldingComposeResult,
   type Setting,
   type SettingWrite,
 } from "@aigen-studio/shared";
@@ -143,4 +146,16 @@ export async function updateSetting(
 export async function deleteSetting(id: string): Promise<void> {
   const res = await request(ApiPaths.setting(id), { method: "DELETE" });
   if (!res.ok) throw new Error(`Delete setting failed: ${await readError(res)}`);
+}
+
+export async function composeScaffolding(
+  input: ScaffoldingComposeRequest,
+): Promise<ScaffoldingComposeResult> {
+  const res = await request(ApiPaths.scaffoldingCompose, {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+  if (!res.ok)
+    throw new Error(`Scaffolding compose failed: ${await readError(res)}`);
+  return scaffoldingComposeResultSchema.parse(await res.json());
 }

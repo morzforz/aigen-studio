@@ -14,6 +14,7 @@ export const ApiPaths = {
   character: (id: string) => `${API_V1}/characters/${id}`,
   settings: `${API_V1}/settings`,
   setting: (id: string) => `${API_V1}/settings/${id}`,
+  scaffoldingCompose: `${API_V1}/scaffolding/compose`,
 } as const;
 
 export const healthResponseSchema = z.object({
@@ -99,6 +100,49 @@ export const settingListSchema = z.object({
   settings: z.array(settingSchema),
 });
 export type SettingList = z.infer<typeof settingListSchema>;
+
+/** M3 story scaffolding — compose memory / lorebook / system prompt from lore ids. */
+export const scaffoldingComposeRequestSchema = z
+  .object({
+    characterIds: z.array(z.string().uuid()).default([]),
+    settingIds: z.array(z.string().uuid()).default([]),
+    storyTitle: z.string().max(500).optional(),
+  })
+  .refine(
+    (v) => v.characterIds.length > 0 || v.settingIds.length > 0,
+    { message: "Select at least one character or setting" },
+  );
+export type ScaffoldingComposeRequest = z.infer<
+  typeof scaffoldingComposeRequestSchema
+>;
+
+export const lorebookEntrySchema = z.object({
+  /** Entry key / name for NovelAI-style lorebook */
+  keys: z.string(),
+  text: z.string(),
+  sourceType: z.enum(["character", "setting"]),
+  sourceId: z.string().uuid(),
+  sourceName: z.string(),
+});
+export type LorebookEntry = z.infer<typeof lorebookEntrySchema>;
+
+export const scaffoldingComposeResultSchema = z.object({
+  storyTitle: z.string(),
+  memory: z.string(),
+  lorebook: z.array(lorebookEntrySchema),
+  systemPrompt: z.string(),
+  /** Combined plain-text export (all three sections) */
+  plainText: z.string(),
+  /** Character / setting ids that were resolved */
+  sources: z.object({
+    characterIds: z.array(z.string().uuid()),
+    settingIds: z.array(z.string().uuid()),
+  }),
+  composedAt: z.string(),
+});
+export type ScaffoldingComposeResult = z.infer<
+  typeof scaffoldingComposeResultSchema
+>;
 
 export const apiErrorSchema = z.object({
   error: z.object({
